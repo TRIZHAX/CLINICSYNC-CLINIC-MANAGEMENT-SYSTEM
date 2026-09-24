@@ -1,0 +1,2 @@
+import Link from "next/link";import { LockKeyhole } from "lucide-react";export default function Forbidden(){return <div className="center-page"><div className="message-card"><LockKeyhole size={34}/><span className="error-code">403 · Access restricted</span><h1>This area isn’t part of your role.</h1><p>Your account is working. Ask an administrator if your clinic responsibilities have changed.</p><Link className="button primary" href="/dashboard">Return to dashboard</Link></div></div>}
+

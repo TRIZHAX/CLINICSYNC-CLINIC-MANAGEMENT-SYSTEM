@@ -1,0 +1,282 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole { ADMIN DOCTOR NURSE RECEPTIONIST PATIENT }
+enum AccountStatus { ACTIVE INACTIVE SUSPENDED }
+enum Sex { MALE FEMALE INTERSEX PREFER_NOT_TO_SAY }
+enum AppointmentStatus { PENDING CONFIRMED IN_PROGRESS COMPLETED CANCELLED NO_SHOW }
+enum NotificationType { APPOINTMENT CONSULTATION FOLLOW_UP SYSTEM }
+
+model Clinic {
+  id            String   @id @default(cuid())
+  name          String
+  address       String?
+  phone         String?
+  email         String?
+  timezone      String   @default("UTC")
+  setupComplete Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  users         User[]
+  patients      Patient[]
+  appointments  Appointment[]
+}
+
+model User {
+  id             String        @id @default(cuid())
+  clinicId       String
+  clinic         Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  email          String        @unique
+  passwordHash   String
+  firstName      String
+  middleName     String?
+  lastName       String
+  phone          String?
+  role           UserRole
+  status         AccountStatus @default(ACTIVE)
+  permissions    String[]      @default([])
+  lastLoginAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  doctor         Doctor?
+  nurse          Nurse?
+  receptionist   Receptionist?
+  patient        Patient?
+  sessions       Session[]
+  resetTokens    PasswordResetToken[]
+  auditLogs      AuditLog[]
+  notifications  Notification[]
+
+  @@index([clinicId, role])
+  @@index([lastName, firstName])
+}
+
+model Doctor {
+  id             String        @id @default(cuid())
+  userId         String        @unique
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doctorId       String        @unique
+  specialization String
+  licenseNumber  String        @unique
+  licenseExpiry  DateTime?
+  schedule       Json?
+  appointments   Appointment[]
+  consultations  Consultation[]
+  prescriptions  Prescription[]
+}
+
+model Nurse {
+  id             String @id @default(cuid())
+  userId         String @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId     String @unique
+  licenseNumber  String?
+  vitalSigns     VitalSign[]
+}
+
+model Receptionist {
+  id         String @id @default(cuid())
+  userId     String @unique
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId String @unique
+}
+
+model Patient {
+  id                     String   @id @default(cuid())
+  clinicId               String
+  clinic                 Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  userId                 String?  @unique
+  user                   User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  patientId              String   @unique
+  firstName              String
+  middleName             String?
+  lastName               String
+  dateOfBirth            DateTime
+  sex                    Sex
+  contactNumber          String
+  email                  String?
+  address                String?
+  emergencyContact       String?
+  emergencyContactNumber String?
+  bloodType              String?
+  allergies              String?
+  existingConditions     String?
+  registrationDate       DateTime @default(now())
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  appointments           Appointment[]
+  medicalRecords         MedicalRecord[]
+  consultations          Consultation[]
+  prescriptions          Prescription[]
+  vitalSigns             VitalSign[]
+
+  @@index([clinicId, lastName, firstName])
+  @@index([contactNumber])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  clinicId    String
+  clinic      Clinic            @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patientId   String
+  patient     Patient           @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctorId    String
+  doctor      Doctor            @relation(fields: [doctorId], references: [id], onDelete: Restrict)
+  startsAt    DateTime
+  endsAt      DateTime
+  reason      String
+  status      AppointmentStatus @default(PENDING)
+  notes       String?
+  createdById String
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  consultation Consultation?
+
+  @@index([clinicId, startsAt, status])
+  @@index([doctorId, startsAt, endsAt])
+  @@index([patientId, startsAt])
+}
+
+model MedicalRecord {
+  id          String   @id @default(cuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  recordType  String
+  title       String
+  description String
+  recordedById String
+  recordedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([patientId, recordedAt])
+}
+
+model Consultation {
+  id                   String      @id @default(cuid())
+  appointmentId        String?     @unique
+  appointment          Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  patientId            String
+  patient              Patient     @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctorId             String
+  doctor               Doctor      @relation(fields: [doctorId], references: [id], onDelete: Restrict)
+  consultationDate     DateTime     @default(now())
+  chiefComplaint       String
+  symptoms             String?
+  assessment           String?
+  diagnosis            String
+  treatment            String?
+  followUpInstructions String?
+  followUpDate         DateTime?
+  additionalNotes      String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  prescriptions        Prescription[]
+  vitalSigns           VitalSign[]
+
+  @@index([patientId, consultationDate])
+  @@index([doctorId, consultationDate])
+}
+
+model VitalSign {
+  id             String        @id @default(cuid())
+  patientId      String
+  patient        Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  consultationId String?
+  consultation   Consultation? @relation(fields: [consultationId], references: [id], onDelete: SetNull)
+  recordedById   String
+  nurseId        String?
+  nurse          Nurse?        @relation(fields: [nurseId], references: [id], onDelete: SetNull)
+  temperature    Decimal?      @db.Decimal(4, 1)
+  systolic       Int?
+  diastolic      Int?
+  pulse          Int?
+  respiratoryRate Int?
+  oxygenSaturation Decimal?    @db.Decimal(5, 2)
+  heightCm       Decimal?      @db.Decimal(5, 2)
+  weightKg       Decimal?      @db.Decimal(6, 2)
+  notes          String?
+  recordedAt     DateTime      @default(now())
+
+  @@index([patientId, recordedAt])
+}
+
+model Prescription {
+  id             String       @id @default(cuid())
+  consultationId String
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  patientId      String
+  patient        Patient      @relation(fields: [patientId], references: [id], onDelete: Restrict)
+  doctorId       String
+  doctor         Doctor       @relation(fields: [doctorId], references: [id], onDelete: Restrict)
+  medicationName String
+  dosage         String
+  frequency      String
+  duration       String
+  instructions   String?
+  prescribedAt   DateTime     @default(now())
+
+  @@index([patientId, prescribedAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, readAt, createdAt])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action        String
+  entityType    String?
+  entityId      String?
+  metadata      Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+

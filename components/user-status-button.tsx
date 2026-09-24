@@ -1,0 +1,2 @@
+"use client";export function UserStatusButton({id,status}:{id:string;status:string}){return <button className="button ghost" style={{minHeight:32,padding:"0 10px",fontSize:10}} onClick={async()=>{const next=status==="ACTIVE"?"INACTIVE":"ACTIVE";const r=await fetch(`/api/users/${id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:next})});if(r.ok)location.reload()}}>{status==="ACTIVE"?"Deactivate":"Activate"}</button>}
+

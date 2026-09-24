@@ -1,0 +1,2 @@
+"use client";export default function ErrorPage({reset}:{reset:()=>void}){return <div className="center-page"><div className="message-card"><span className="error-code">Something went wrong</span><h1>We couldn’t load this area.</h1><p>No changes were made. Try again, or contact your administrator if the issue continues.</p><button className="button primary" onClick={reset}>Try again</button></div></div>}
+
