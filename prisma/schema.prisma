@@ -7,11 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole { ADMIN DOCTOR NURSE RECEPTIONIST PATIENT }
-enum AccountStatus { ACTIVE INACTIVE SUSPENDED }
-enum Sex { MALE FEMALE INTERSEX PREFER_NOT_TO_SAY }
-enum AppointmentStatus { PENDING CONFIRMED IN_PROGRESS COMPLETED CANCELLED NO_SHOW }
-enum NotificationType { APPOINTMENT CONSULTATION FOLLOW_UP SYSTEM }
+enum UserRole {
+  ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+  PATIENT
+}
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+enum Sex {
+  MALE
+  FEMALE
+  INTERSEX
+  PREFER_NOT_TO_SAY
+}
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+enum NotificationType {
+  APPOINTMENT
+  CONSULTATION
+  FOLLOW_UP
+  SYSTEM
+}
 
 model Clinic {
   id            String   @id @default(cuid())
