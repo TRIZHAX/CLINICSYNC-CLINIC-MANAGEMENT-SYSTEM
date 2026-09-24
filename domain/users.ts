@@ -26,6 +26,7 @@ export abstract class User implements Informative {
 }
 
 export class Admin extends User {
+  constructor(data: SafeUserData) { super(data); }
   getUserInformation() { return { name: this.displayName, role: "Administrator", email: this.data.email }; }
 }
 export class Doctor extends User {
