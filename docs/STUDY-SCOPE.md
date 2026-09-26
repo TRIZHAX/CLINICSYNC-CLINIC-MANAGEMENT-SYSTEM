@@ -1,12 +1,10 @@
-# ClinicSync — School Clinic Management System
-
-ClinicSync is a web-based School Clinic Management System designed to support the daily operations of a public school clinic in a rural academic institution, with the study focused on a selected school in San Miguel, Bulacan.
+# ClinicSync — Scope of the Study
 
 ## Scope of the Study
 
 ClinicSync is designed specifically to automate the daily operations of public school clinics in rural academic institutions, focusing on a selected school in San Miguel, Bulacan.
 
-### Functional Capabilities
+The following are the functional capabilities of the system:
 
 - User Authentication and Access Control
 - Student Health Profile Management
@@ -25,13 +23,15 @@ The study will not cover the following:
 - Does not provide AI-driven medical diagnosis
 - The application only relies on the local school environment's available hardware and local network infrastructure.
 
-## Definition of Terms
+## 1.6 Definition of Terms
+
+To provide a clear understanding of the key concepts and technical terms used throughout this paper, the following terms are defined as follows:
 
 ### Academic Institution
 Refers to an educational organization, specifically a public elementary or high school in San Miguel, Bulacan where the proposed system is implemented and evaluated.
 
 ### Clinic Management System
-The software application is designed to automate healthcare tasks. In this study, it refers to the developed system that manages the student health profiles, clinic visit logs, and medicine inventories.
+The software application is designed to automate healthcare tasks. In this study, it refers to the developed system that manages student health profiles, clinic visit logs, and medicine inventories.
 
 ### Medicine Inventory
 This refers to the physical stock of medicine and first aid supplies kept in the school clinic. In this project, it refers to the digital module that monitors stock levels, tracks item expiration dates, and records medicine usage.
@@ -41,26 +41,3 @@ A software design paradigm based on the concept of objects containing data and c
 
 ### Paper-Based Operations
 It is the traditional method of recording data manually using physical notebooks, logbooks, and index cards. In this study, it represents the existing manual workflow in rural school clinics that the system aims to replace.
-
-## Core System Modules
-
-- Authentication and role-based access control
-- Student registration and health profiles
-- Clinic appointments and visit tracking
-- Consultation records
-- Emergency contact information
-- Medicine and first-aid inventory tracking
-- Reports for school clinic operations and DepEd compliance
-- Audit logs and administrative controls
-
-## Study Documentation
-
-The complete scope, limitations, and definitions are available in [`docs/STUDY-SCOPE.md`](docs/STUDY-SCOPE.md).
-
-## Technology
-
-- Next.js
-- TypeScript
-- Prisma ORM
-- PostgreSQL
-- Object-oriented/domain-based application structure
